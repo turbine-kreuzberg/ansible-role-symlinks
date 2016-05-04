@@ -1,0 +1,17 @@
+---
+- name: Look for symlinks that exists already as directories
+  stat: path="{{ item.symlink }}"
+  register: dirs
+  with_items: "{{ symlinks_directory_symlink_dict }}"
+
+- name: Move existing directories to link source location
+  command: "mv {{ item.item.symlink }} {{ item.item.directory }}"
+  when: item.stat.exists == true and item.stat.islnk == false
+  with_items: "{{ dirs.results }}"
+
+- name: Create symlinks
+  file:
+    src: "{{ item.directory }}"
+    dest: "{{ item.symlink }}"
+    state: link
+  with_items: "{{ symlinks_directory_symlink_dict }}"

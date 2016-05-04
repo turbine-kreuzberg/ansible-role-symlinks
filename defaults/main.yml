@@ -1,0 +1,6 @@
+---
+# #dictionary for symlinks must look like this
+# directory_symlink_dictionary:
+#   - { directory: '/home/foo', symlink: '/home/bar' }
+symlinks_directory_symlink_dict: []
+symlinks_move_directory: yes

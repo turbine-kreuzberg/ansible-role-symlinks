@@ -1,0 +1,46 @@
+---
+- hosts: localhost
+
+  vars:
+    distribution: ubuntu
+    version: 14.04
+    init: /sbin/init
+    run_opts: "--privileged=true"
+    playbook: test.yml
+
+  pre_tasks:
+
+    # Create ansible.cfg with correct roles_path
+    - shell: printf '[defaults]\nroles_path=../ \ncallback_plugins=tests/callbacks' >ansible.cfg
+    ## Pull container
+    - name: pull container
+      command: docker pull "{{distribution}}":"{{version}}"
+    ## Customize container
+    - name: build container
+      command: docker build --rm=true --file=tests/Dockerfile."{{distribution}}"-"{{version}}" --tag="{{distribution}}"-"{{version}}":ansible tests
+
+    # Run container in detached state
+    - name: run container
+      command: docker run "{{run_opts}}" --detach --volume={{ playbook_dir }}/..:/etc/ansible/roles/role_under_test:rw "{{distribution}}"-"{{version}}":ansible "{{init}}"
+      register: container_id
+
+    - name: playbook syntax check
+      command: "docker exec --tty {{container_id.stdout}} env TERM=xterm ansible-playbook /etc/ansible/roles/role_under_test/tests/{{playbook}} --syntax-check"
+      ignore_errors: yes
+
+    - name: run playbook
+      command: "docker exec --tty {{container_id.stdout}} env TERM=xterm ansible-playbook /etc/ansible/roles/role_under_test/tests/{{playbook}}"
+      ignore_errors: yes
+
+    - name: run playbook second time
+      command: "docker exec --tty {{container_id.stdout}} env TERM=xterm ansible-playbook /etc/ansible/roles/role_under_test/tests/{{playbook}}"
+      ignore_errors: yes
+
+    - name: access to container
+      command: printf "docker exec -i -t {{container_id.stdout}} bash"
+
+    - name: stop container {{container_id.stdout}}
+      command: docker stop {{container_id.stdout}}
+
+    - name: rm container {{container_id.stdout}}
+      command: docker rm {{container_id.stdout}}

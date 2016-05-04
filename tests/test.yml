@@ -1,0 +1,45 @@
+---
+- hosts: localhost
+  remote_user: root
+
+  vars:
+    symlinks_directory_symlink_dict:
+      - { directory: '/tmp/votum.symlinks/releases/00000000000000', symlink: '/tmp/votum.symlinks/current' }
+      - { directory: '/tmp/votum.symlinks/shared/common', symlink: '/tmp/votum.symlinks/releases/00000000000000/common' }
+      - { directory: '/tmp/votum.symlinks/shared/media', symlink: '/tmp/votum.symlinks/releases/00000000000000/media' }
+      - { directory: '/tmp/votum.symlinks/shared/log', symlink: '/tmp/votum.symlinks/releases/00000000000000/var/log' }
+    test_directories:
+      - /tmp/votum.symlinks/releases/00000000000000/common
+      - /tmp/votum.symlinks/releases/00000000000000/media
+      - /tmp/votum.symlinks/releases/00000000000000/var
+      - /tmp/votum.symlinks/shared/log
+
+  pre_tasks:
+  - name: create directory structure
+    file:
+      path: "{{ item }}"
+      state: directory
+      mode: 0755
+    with_items: "{{ test_directories }}"
+    ignore_errors: yes
+
+  roles:
+    - role_under_test
+
+  post_tasks:
+    - stat: path="{{ symlinks_directory_symlink_dict.0.symlink }}"
+      register: sym1
+    - fail: msg="path {{ symlinks_directory_symlink_dict.0.symlink }} doesn't exist or isn't a symlink"
+      when: sym1.stat.islnk is not defined or not sym1.stat.islnk
+    - stat: path="{{ symlinks_directory_symlink_dict.1.symlink }}"
+      register: sym2
+    - fail: msg="path {{ symlinks_directory_symlink_dict.1.symlink }} doesn't exist or isn't a symlink"
+      when: sym2.stat.islnk is not defined or not sym2.stat.islnk
+    - stat: path="{{ symlinks_directory_symlink_dict.2.symlink }}"
+      register: sym3
+    - fail: msg="path {{ symlinks_directory_symlink_dict.2.symlink }} doesn't exist or isn't a symlink"
+      when: sym3.stat.islnk is not defined or not sym3.stat.islnk
+    - stat: path="{{ symlinks_directory_symlink_dict.3.symlink }}"
+      register: sym4
+    - fail: msg="path {{ symlinks_directory_symlink_dict.3.symlink }} doesn't exist or isn't a symlink"
+      when: sym4.stat.islnk is not defined or not sym4.stat.islnk
