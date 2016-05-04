@@ -1,5 +1,6 @@
-Role Name
-=========
+Ansible Role: votum.symlinks
+============================
+[![Build Status](https://travis-ci.org/votum/ansible-role-symlinks.svg?branch=master)](https://travis-ci.org/votum/ansible-role-symlinks)
 
 Role for turning existing directories into symlinks. 
 Usefull for preparing capistrano style deployments,
