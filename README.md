@@ -3,7 +3,11 @@ Ansible Role: votum.symlinks
 [![Build Status](https://travis-ci.org/votum/ansible-role-symlinks.svg?branch=master)](https://travis-ci.org/votum/ansible-role-symlinks)
 
 Role for turning existing directories into symlinks. 
-Usefull for preparing capistrano style deployments.
+It provides automated symlinking i.e. usefull for preparing capistrano style deployments.
+
+If it finds an existing directory under the configured symlink location it moves
+it to the symlink source location before creating the symlink.
+If a symlinked directory does not exist it will be created empty on the fly.
 
 Requirements
 ------------

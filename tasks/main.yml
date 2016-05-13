@@ -9,6 +9,13 @@
   when: item.stat.exists == true and item.stat.islnk == false
   with_items: "{{ dirs.results }}"
 
+- name: Create linked directories empty if necessary
+  file:
+  args:
+    path: "{{ item.directory }}"
+    state: directory
+  with_items: "{{ symlinks_directory_symlink_dict }}"
+
 - name: Create symlinks
   file:
     src: "{{ item.directory }}"
