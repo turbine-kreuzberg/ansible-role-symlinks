@@ -1,20 +1,21 @@
 ---
+- name: Ensure directories exist
+  file:
+    path: "{{ item.directory }}"
+    state: directory
+    recurse: yes
+  with_items: "{{ symlinks_directory_symlink_dict }}"
+
 - name: Look for symlinks that exists already as directories
-  stat: path="{{ item.symlink }}"
+  stat:
+    path: "{{ item.symlink }}"
   register: dirs
   with_items: "{{ symlinks_directory_symlink_dict }}"
 
 - name: Move existing directories to link source location
   command: "mv {{ item.item.symlink }} {{ item.item.directory }}"
-  when: item.stat.exists == true and item.stat.islnk == false
+  when: item.stat.exists and not item.stat.islnk
   with_items: "{{ dirs.results }}"
-
-- name: Create linked directories empty if necessary
-  file:
-  args:
-    path: "{{ item.directory }}"
-    state: directory
-  with_items: "{{ symlinks_directory_symlink_dict }}"
 
 - name: Create symlinks
   file:
@@ -22,3 +23,4 @@
     dest: "{{ item.symlink }}"
     state: link
   with_items: "{{ symlinks_directory_symlink_dict }}"
+
